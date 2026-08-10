@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "trog-skills",
+  "owner": {
+    "name": "Michael Harris",
+    "email": "throwingfish@gmail.com"
+  },
+  "metadata": {
+    "description": "Michael Harris's authored Claude Code agent skills."
+  },
+  "plugins": [
+    {
+      "name": "skills",
+      "source": ".",
+      "description": "Authored agent skills: a design-patterns dialog that decides code shape with you before writing it, and run-script-handoff conventions for commands you hand back to a human terminal.",
+      "author": {
+        "name": "Michael Harris"
+      },
+      "category": "development",
+      "homepage": "https://github.com/troglodyte/skills"
+    }
+  ]
+}
