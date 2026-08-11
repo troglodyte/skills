@@ -1,5 +1,5 @@
 ---
-name: repo-work-summary
+name: explain-it-to-me
 description: Produce a markdown briefing that explains what work was done in a repository — high-level narrative, the details worth knowing, gotchas, plus Mermaid diagrams, tables, and charts where they earn their place. Use this skill whenever the user wants to come up to speed on code changes, including requests like "catch me up on this repo", "what changed while I was out", "summarize this branch or PR", "explain the last 20 commits", "what did we ship last sprint", "write a handoff doc for this work", or "review what's on this branch" — and any other request to understand, review, or document a body of work in a git repo, even if the user never says the word "summary".
 ---
 

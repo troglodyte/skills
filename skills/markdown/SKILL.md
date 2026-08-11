@@ -1,5 +1,5 @@
 ---
-name: md
+name: markdown
 description: Design spec for authoring Markdown (.md) files that render correctly and read well in their destination. Use this whenever producing a Markdown file the user will take somewhere else — READMEs, docs pages, blog posts, specs, changelogs, ADRs, notes, AGENTS.md/CLAUDE.md, PR descriptions, or anything saved as .md or .mdx. Also use when editing, cleaning up, converting, or restructuring existing Markdown, when the user pastes Markdown that renders wrong, or when the request is "write a doc/post/guide/spec" and a .md file is the natural deliverable. Consult it even for short files and even when the Markdown feels obvious — most Markdown defects are invisible in the source and only appear in the destination renderer.
 ---
 
