@@ -57,6 +57,9 @@ iterating on one skill. Current state worth knowing:
   repo is the newer home; editing here does **not** change the installed skill until that symlink is
   repointed or the plugin is installed.
 - `run-script-handoff` is not installed anywhere yet.
+- `deploy` is installed by symlink from `~/.claude/skills/deploy`, pointing into this repo,
+  so edits here are live in the next session. Its baseline test is recorded; the GREEN arm
+  has never been run — see `deploy/TESTING.md` before trusting it.
 - `improve-codebase-architecture/` at the repo root is an empty untracked stub, outside `skills/` and
   therefore not shipped; the installed skill of that name comes from `~/.agents/skills/`.
 
