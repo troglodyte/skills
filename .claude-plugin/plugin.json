@@ -1,8 +1,8 @@
 {
   "name": "skills",
   "displayName": "Trog Skills",
-  "version": "0.2.0",
-  "description": "Authored Claude Code agent skills. design-patterns runs a short dialog to settle the shape of code before it is written — naming the axis of change, starting from the direct version, and leaving the choice open. explain-it-to-me turns a body of git work into a briefing that reads the diff rather than rewording the log. markdown is a design spec for .md files that survive the renderer they end up in. run-script-handoff covers the conventions for handing a human a command to run in their own terminal and paste back.",
+  "version": "0.3.0",
+  "description": "Authored Claude Code agent skills. deploy runs the whole landing sequence for finished work on a branch — merge, version bump, changelog, annotated tag, push, branch and worktree cleanup — and ships the branch unmodified. design-patterns runs a short dialog to settle the shape of code before it is written — naming the axis of change, starting from the direct version, and leaving the choice open. explain-it-to-me turns a body of git work into a briefing that reads the diff rather than rewording the log. markdown is a design spec for .md files that survive the renderer they end up in. run-script-handoff covers the conventions for handing a human a command to run in their own terminal and paste back.",
   "author": {
     "name": "Michael Harris",
     "email": "throwingfish@gmail.com"
@@ -12,6 +12,8 @@
   "license": "MIT",
   "keywords": [
     "skills",
+    "deploy",
+    "release",
     "design-patterns",
     "architecture",
     "markdown",

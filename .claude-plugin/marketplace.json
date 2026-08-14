@@ -12,7 +12,7 @@
     {
       "name": "skills",
       "source": ".",
-      "description": "Authored agent skills: a design-patterns dialog that decides code shape with you before writing it, explain-it-to-me briefings that catch a reader up on what a repo actually changed, a markdown spec for docs that render correctly wherever they land, and run-script-handoff conventions for commands you hand back to a human terminal.",
+      "description": "Authored agent skills: a deploy sequence that lands finished branch work end to end without amending it, a design-patterns dialog that decides code shape with you before writing it, explain-it-to-me briefings that catch a reader up on what a repo actually changed, a markdown spec for docs that render correctly wherever they land, and run-script-handoff conventions for commands you hand back to a human terminal.",
       "author": {
         "name": "Michael Harris"
       },
