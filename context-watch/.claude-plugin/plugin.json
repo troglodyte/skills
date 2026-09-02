@@ -1,0 +1,10 @@
+{
+  "name": "context-watch",
+  "displayName": "Context Watch",
+  "version": "0.1.0",
+  "description": "Warns when a Claude Code session enters the expensive population, and provides a deliberate compaction procedure and preamble-bloat scanner.",
+  "keywords": ["context", "tokens", "cost", "compaction"],
+  "author": {
+    "name": "Michael Harris"
+  }
+}

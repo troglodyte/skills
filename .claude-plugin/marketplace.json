@@ -18,6 +18,16 @@
       },
       "category": "development",
       "homepage": "https://github.com/troglodyte/skills"
+    },
+    {
+      "name": "context-watch",
+      "source": "./context-watch",
+      "description": "Warns when a Claude Code session enters the expensive population, and provides a deliberate compaction procedure and preamble-bloat scanner. A guard hook watches every turn for the context sizes that concentrate cost, and the check skill diagnoses where the context actually went before choosing between clear, compact, and a subagent.",
+      "author": {
+        "name": "Michael Harris"
+      },
+      "category": "development",
+      "homepage": "https://github.com/troglodyte/context-watch-plugin"
     }
   ]
 }
