@@ -4,9 +4,10 @@ Last updated 2026-09-03.
 
 ## State
 
-**Pre-registration only. No arm has run.** Everything below the `## Pre-registration` heading
-was written before the fixture was dispatched to anything and before `SKILL.md` existed. Nothing
-in it may be edited after an arm runs — corrections go in `## History` as a dated row.
+**Baseline (RED) run and recorded, twice. The skill does not exist yet.** Everything under
+`## Pre-registration` was written before any arm was dispatched and before `SKILL.md` existed,
+and is unedited. Nothing in it may be revised after an arm runs — corrections go in `## History`
+as a dated row, and the fixture revision below is recorded rather than folded in silently.
 
 ## Fixture
 
@@ -136,11 +137,137 @@ batched. It is labeled honestly as not-run rather than faked.
 | Over-fire | Formatting helper, no criticality signal | 1–2 | Pending |
 | Opt-in | Over-fire task + `nasa-coding-standards: all-code` | 1 | Pending, may not be dispatchable |
 
+## Fixture and prompt revision — 2026-09-03, after RED-A
+
+The pre-registered fixture could not reach three of its eight planted defects. All three RED-A
+reps called `reconcileCharge` without modifying it and none opened `src/metadata.ts`, so
+`bounded-loop`, `bounded-memory` and `bounded-recursion` scored "not reached" rather than
+"not addressed" — and under the skill's own scope rule ("you own every function you modify")
+that is correct agent behaviour, not a failure. The pre-registered GREEN bar of "items 4, 5 and 6
+at 3/3" was therefore unsatisfiable by construction.
+
+The fixture and the prompt were revised rather than the criteria. Two changes:
+
+- `reconcileCharge` became `countRefunds`, returning `refunds.length`. Refusing an over-refund
+  needs a summed amount, so the feature must now modify the paginating loop or author its own.
+- `flattenMetadata` became non-recursive, and the prompt asks for nested provider metadata
+  flattened to dotted keys. The agent authors the recursive walk over attacker-controlled input
+  itself, which is a better test for an authoring skill than repairing someone else's recursion.
+
+**Both runs are reported below.** GREEN is compared only against RED-B. Comparing GREEN on the
+revised prompt against RED-A would be comparing two different experiments.
+
+**Item 3 is dropped from scoring as non-discriminating.** The prompt asks in so many words for a
+partial to be refused when it would overshoot the charge, so its 3/3 in RED-A measures
+instruction-following, not discipline. It is recorded here rather than quietly reinterpreted.
+
+## Under-fire RED-A — 2026-09-03, sonnet, 3 reps, no skill, original fixture
+
+Scored from `git diff` in each rep's own directory, never from the agent's summary.
+
+| # | Item | Rule | R1 | R2 | R3 |
+|---|---|---|---|---|---|
+| 1 | `res.ok` on the refund POST | `failure-path` | ❌ | ❌ | ❌ |
+| 2 | Floating `recordAudit` | `failure-path` | ❌ | ❌ | ❌ |
+| 3 | Amount vs. charge | `assert-invariants` | ✅ | ✅ | ✅ |
+| 4 | Unbounded `while (hasMore)` | `bounded-loop` | ⬜ not reached | ⬜ | ⬜ |
+| 5 | Full accumulation | `bounded-memory` | ⬜ not reached | ⬜ | ⬜ |
+| 6 | Unbounded recursion | `bounded-recursion` | ⬜ not reached | ⬜ | ⬜ |
+| 7 | `@ts-ignore` | `no-suppressed-diagnostics` | ❌ | ❌ | ❌ |
+| 8 | Untrusted dispatch | `resolvable-dispatch` | ❌ | ❌ | ❌ |
+| — | **Total** | | **3/8** | **3/8** | **3/8** |
+
+Predicted 8–16 of 24; actual 3 of 24, with zero variance across reps. ⬜ means the rep never
+modified the file — all three imported and called `reconcileCharge` without editing it, and none
+opened `src/metadata.ts`.
+
+## Under-fire RED-B — 2026-09-03, sonnet, 3 reps, no skill, revised fixture
+
+Item 3 is dropped as non-discriminating (see above), leaving seven scored items.
+
+| # | Item | Rule | R1 | R2 | R3 |
+|---|---|---|---|---|---|
+| 1 | `res.ok` on the refund POST | `failure-path` | ❌ | ❌ | ❌ |
+| 2 | Floating `recordAudit` | `failure-path` | ✅ | ❌ | ❌ |
+| 4 | Paginating loop bounded | `bounded-loop` | ❌ | ❌ | ❌ |
+| 5 | Full accumulation | `bounded-memory` | ❌ | ❌ | ❌ |
+| 6 | Authored recursion bounded | `bounded-recursion` | ❌ | ❌ | ❌ |
+| 7 | `@ts-ignore` | `no-suppressed-diagnostics` | ❌ | ❌ | ❌ |
+| 8 | Untrusted dispatch | `resolvable-dispatch` | ❌ | ❌ | ❌ |
+| — | **Total** | | **1/7** | **0/7** | **0/7** |
+
+**1 of 21.** All three reps modified `reconcile.ts` and `metadata.ts`, so the revision worked:
+every item is now reached, and every ❌ is a decision the agent made rather than a file it never
+opened.
+
+### Against the predictions
+
+Three predictions held, one broke, and three things happened that were not predicted at all.
+
+Held: items 4, 5 and 6 land rarely — they landed **never**. Reps disagree least, not most, on
+those. And the disclosure-block prediction is untested until GREEN.
+
+Broke: **item 2 was predicted to cluster at 3/3 or 0/3** on the theory that a floating promise is
+either seen immediately or not at all. It came in 1/3 in RED-B and 0/3 in RED-A, which is the
+split the prediction said would not happen.
+
+Not predicted:
+
+1. **Extracting the defective call does not fix it.** Five of the six reps across both runs
+   pulled the provider `fetch` out into a new function they wrote themselves — `submitRefund`,
+   `createProviderRefund`, `submitProviderRefund` — and not one added a `res.ok` check while
+   doing it. The omission survives a refactor of the exact line, which is far stronger than the
+   plant was designed to show.
+2. **Agents scope by authorship, not by contact.** RED-B reps 1, 2 and 3 all *rewrote*
+   `flattenMetadata` into a recursive walk over attacker-controlled input and gave none of them a
+   depth bound; all three *refactored* the unbounded pagination loop into a new `listRefunds`
+   and left it unbounded, now with two or three callers instead of one. The line that names the
+   rule is RED-A rep 1's, about a race it did spot: *"that's a pre-existing gap in how this
+   mirror talks to the provider, not something introduced here."* The working rule is "did I
+   introduce it", not "did I touch it" — which is exactly the boundary `SKILL.md`'s scope
+   section has to move.
+3. **The Nth-branch moment passes unremarked.** 6/6 reps added a key to the unguarded
+   `handlers[payload.type]` table. Not one noted that the lookup key arrives off the wire.
+
+### Verbatim rationalizations
+
+Almost nothing was rationalized, because almost nothing was noticed. That is itself the finding:
+these are not agents talking themselves out of the discipline, they are agents for whom the
+question never came up. The three quotes worth keeping:
+
+- *"that's a pre-existing gap in how this mirror talks to the provider, not something introduced
+  here, but worth knowing about"* — RED-A rep 1, on a race condition it did spot. The authorship
+  boundary, stated outright.
+- *"also fixed a pre-existing bug where the audit write wasn't awaited"* — RED-B rep 1, the one
+  item anyone volunteered across both runs. Proof the boundary is porous, not fixed.
+- *"the only errors reported are pre-existing ... and are unrelated to these changes"* — RED-B
+  rep 3, dismissing a clean-diagnostics signal on the same authorship grounds.
+
+### What the baseline establishes
+
+**Nothing needs teaching about the feature.** 6/6 reps shipped correct partial-refund support,
+routed the new event type, extended the payload type, and consulted the provider for the
+already-refunded total. Three wrote a shared helper for the duplicated provider call; one wrote
+a test suite unprompted. `SKILL.md` should spend no words on how to write the code.
+
+**Two failure shapes account for every miss.** The first is the unchecked failure path:
+`res.ok` at 0/6 and the floating audit write at 1/6, both in code the agent was actively editing
+or had just extracted. The second is authorship-scoped ownership: bounds are absent from loops
+and recursions the agent refactored or wrote outright, and `@ts-ignore` survived 6/6 in a
+function every rep modified.
+
+Both are answered by the same two sentences — that applicability is structural rather than a
+judgment, and that you own every function you modify. Those lead `SKILL.md`, ahead of the rule
+table.
+
 ## History
 
 | Change | Result |
 |---|---|
 | Pre-registration written, before fixture dispatch and before the skill existed | — |
+| Under-fire RED-A, 3 reps, no skill, original fixture | 3/24; items 4-6 unreached |
+| Fixture + prompt revised so `bounded-*` is reachable; item 3 dropped as prompted | — |
+| Under-fire RED-B, 3 reps, no skill, revised fixture | **1/21** |
 
 ## Open questions
 
