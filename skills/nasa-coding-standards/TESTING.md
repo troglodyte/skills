@@ -354,6 +354,31 @@ while editing the very file two of them sit in.
 
 This is the arm that had to carry the description's lack of a negative clause, and it did.
 
+## Opt-in arm — 2026-09-03, sonnet, 1 rep — RAN, and passed
+
+The plan expected this arm might not be dispatchable at all, on the theory that a subagent
+inherits the session's CLAUDE.md and cannot see a fixture's own. **That turned out to be wrong.**
+
+The over-fire task (add a `formatAmount` display helper — no categorical test answers yes) was
+run against a fixture whose own `CLAUDE.md` carries `nasa-coding-standards: all-code`. The rep
+was asked to quote that file before starting, and did, verbatim.
+
+**Pass.** It produced a disclosure block on a change the five tests exclude, and named the marker
+as its reason: *"Power of 10 (repo declares `nasa-coding-standards: all-code`)"*. The block
+carried two applied-rule bullets and one `Seen, not touched:` bullet, all anchored.
+
+Worth noting against the over-fire arm, which was clean on the identical task without the marker:
+the marker is the only difference, and it flipped the behaviour. That is the opt-in working as
+designed, and it is also the sharpest evidence in this file that the skill's firing is under the
+description's control rather than incidental.
+
+One incidental finding: this rep changed behaviour to do the task — it added a `getCharge` call
+inside `handleRefundFailed` to get an amount worth formatting, and flagged the new outbound HTTP
+call on a failing path explicitly rather than burying it. Both over-fire reps did the same thing.
+The fixture's log line has no amount to format, which makes the over-fire task slightly more
+invasive than intended. It did not affect either arm's verdict, but a cleaner over-fire fixture
+would put an amount already in scope.
+
 ## History
 
 | Change | Result |
@@ -364,6 +389,7 @@ This is the arm that had to carry the description's lack of a negative clause, a
 | Under-fire RED-B, 3 reps, no skill, revised fixture | **1/21** |
 | Under-fire GREEN, 3 reps, skill loaded (name-only trigger) | **10/21**; bar not met |
 | Over-fire check, 2 reps | clean 2/2 |
+| Opt-in arm, 1 rep, `all-code` marker in the fixture's CLAUDE.md | pass — marker read and cited |
 
 ## Open questions
 
