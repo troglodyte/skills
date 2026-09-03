@@ -27,7 +27,7 @@ for a reviewer to see.
 | `bounded-recursion` | A function recurses over a structure whose depth crossed a trust boundary | A depth counter that throws, or an explicit stack |
 | `failure-path` | A call returns a Promise, a `Response` or an exit code, or emits `'error'` | Awaited or `.catch`ed non-emptily; `res.ok` checked; exit code read; an `'error'` listener; no empty `catch` |
 | `assert-invariants` | A value's validity is not expressible in its type | Zod at the boundary, an explicit check that throws a typed error, or `never` in an exhaustive switch |
-| `resolvable-dispatch` | You add to, or read from, a lookup whose key comes from outside the process — adding an entry to one counts | An allowlist, or a `satisfies`-checked map with a rejecting default. Never `eval` |
+| `resolvable-dispatch` | You add to, or read from, a lookup whose key comes from outside the process — adding an entry to one counts | If the lookup is typed `Record<string, …>`, convert it to a `satisfies`-checked map with a rejecting default before adding your key. Never `eval` |
 | `no-suppressed-diagnostics` | The change adds or touches `@ts-ignore`, `@ts-expect-error`, `eslint-disable` or `any` | Remove it, or a written reason on the same line. `tsc --noEmit` clean |
 
 Two carry more weight than the rest in Node. **`fetch` does not throw on 4xx or 5xx** — it
@@ -49,7 +49,7 @@ Violations in code you did not modify are not fixed and not enumerated — repor
 
 `failure-path` and `no-suppressed-diagnostics` **cannot be relaxed.** Each already contains its
 own one-line minimum: `.catch(noop)` with a comment *is* checking the failure path, and
-`@ts-ignore` with a written reason *is* rule 10. There is nothing left to trade.
+`@ts-ignore` with a written reason *is* `no-suppressed-diagnostics`. There is nothing left to trade.
 
 Everything else can be, if the guarantee is **external and locatable** — a config key, a type, a
 caller contract, a platform limit. Never a likelihood: "the loop is short in practice" is the
@@ -74,10 +74,10 @@ filter is having done something.
 
 ```text
 Power of 10:
-- failure-path → checked res.ok, threw ProviderError (src/refunds.ts:handleRefundCreated)
-- bounded-memory → summed each page instead of accumulating (src/reconcile.ts:reconcileCharge)
-- Relaxed: bounded-loop — page count bounded by provider max_pages (src/config.ts)
-- Seen, not touched: metadata.ts recurses without a depth cap
+- failure-path → checked res.ok and threw ImportError (src/importer.ts:fetchManifest)
+- bounded-memory → streamed rows instead of buffering the result set (src/importer.ts:loadRows)
+- Relaxed: bounded-loop — page count bounded by api.maxPages (src/settings.ts)
+- Seen, not touched: parser.ts walks nested groups without a depth cap
 ```
 
 The `file:symbol` anchor is required — an unanchored claim is the cheapest thing to write and

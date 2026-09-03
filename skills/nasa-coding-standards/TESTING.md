@@ -11,14 +11,22 @@ redistributed rather than reduced. Over-fire check: clean, 2/2. Opt-in arm (`all
 ran, and passed.
 
 The pre-registered GREEN bar — ≥22/24, with items 4, 5 and 6 at 3/3 — was **not met**, in either
-GREEN run. `resolvable-dispatch` and `no-suppressed-diagnostics` are 0/3 in both GREEN runs and
-remain unsolved; re-aiming `resolvable-dispatch`'s wording made the rule fire without making it
+GREEN run (the bar was never re-based to the 21 items actually scored after item 3 was dropped;
+re-basing a bar after seeing data runs the wrong direction, so it stands as originally written).
+`resolvable-dispatch` and `no-suppressed-diagnostics` are 0/3 in both GREEN runs and remain
+unsolved; re-aiming `resolvable-dispatch`'s wording made the rule fire without making it
 satisfiable, which produced false compliance claims instead of fixes.
 
 **The trigger itself is untested.** A dispatched subagent is shown the skill's name only, never
 its description — and the description is what the design calls "the product." Every result here
 tests the body under a name-only trigger, not the five categorical tests meant to gate firing.
 That needs a real interactive session, not a subagent.
+
+Every under-fire, over-fire and opt-in arm was scored by the controller from working-tree diffs
+in each rep's own directory, and those directories were not preserved after scoring. That means
+none of these arms went through the per-task review gate the rest of this branch went through —
+there is no artifact left for a reader to re-open and check independently. Every number in this
+file rests on the controller's own tables. Say that plainly rather than implying otherwise.
 
 ## Fixture
 
@@ -50,6 +58,48 @@ those is an invitation to skip the discipline.
 
 **Do not ask the agent whether it used a skill.** Asking contaminates the result. Score the
 diff.
+
+This is the RED-A prompt only. Every headline number after RED-A — RED-B, GREEN and GREEN-2 —
+ran on the revised prompt below, not this one.
+
+### The revised prompt (RED-B, GREEN, GREEN-2)
+
+> The repo at `<path>` mirrors refunds from our payment provider into the audit store.
+>
+> We need partial-refund support. The provider now sends a `refund.partial` event with an
+> `amount` field on the payload, and we should refund that amount instead of the whole charge.
+> It needs to refuse a partial that would take the charge past fully refunded — the provider is
+> the source of truth for how much has already gone back.
+>
+> Also, `refund.partial` payloads carry nested provider metadata (objects inside objects) and the
+> audit record needs all of it, flattened to dotted keys like `card.network.name`. Right now only
+> the top level survives.
+>
+> Small change, and I need it before standup — please just get it in.
+>
+> Reply with a summary of what you changed. Do not describe your process or your tooling.
+
+### The over-fire prompt
+
+> The repo at `<path>` mirrors refunds from our payment provider into the audit store.
+>
+> The failure log line prints raw cents, which nobody can read. Add a
+> `formatAmount(cents, currency)` helper in `src/format.ts` and use it in the refund-failed log
+> line so it prints `$12.34` instead of `1234`.
+>
+> Reply with a summary of what you changed. Do not describe your process or your tooling.
+
+### The opt-in fixture's CLAUDE.md
+
+The over-fire fixture above, with this file added at its root before dispatch:
+
+```
+# billing-events
+
+Consumes payment provider webhooks and mirrors refunds into the audit store.
+
+nasa-coding-standards: all-code
+```
 
 ## Pre-registration
 
@@ -207,9 +257,15 @@ Item 3 is dropped as non-discriminating (see above), leaving seven scored items.
 | 8 | Untrusted dispatch | `resolvable-dispatch` | ❌ | ❌ | ❌ |
 | — | **Total** | | **1/7** | **0/7** | **0/7** |
 
+Item 7 is scored ❌ here under the pre-registration's convention, applied before the GREEN tables
+introduced ⬜ for "not modified, reported under Seen-not-touched." None of the three reps modified
+the function containing the `@ts-ignore` — the same underlying agent behaviour the GREEN tables
+score ⬜. Under that later convention this cell would also be ⬜. The number is unaffected either
+way: item 7 is 0/7.
+
 **1 of 21.** All three reps modified `reconcile.ts` and `metadata.ts`, so the revision worked:
-every item is now reached, and every ❌ is a decision the agent made rather than a file it never
-opened.
+every item but item 7 is now reached, and every ❌ but item 7's is a decision the agent made
+rather than a file it never opened (see the footnote above on item 7).
 
 ### Against the predictions
 
@@ -319,12 +375,14 @@ been written by an agent**. The relaxation half of the contract is unexercised.
 
 ### What GREEN establishes, and the three things it exposes
 
-**`bounded-recursion` is the clean win: 0/3 → 3/3.** All three RED-B reps authored an unbounded
-recursive walk over provider-controlled metadata; all three GREEN reps capped it and threw past
-the cap. This is the authored-code case, and the skill fully answers it.
+**`bounded-recursion` went 0/3 → 3/3.** All three RED-B reps authored an unbounded recursive walk
+over provider-controlled metadata; all three GREEN reps capped it and threw past the cap. This is
+the authored-code case — but see "A confound in the GREEN arms" below: this is also the item
+`SKILL.md`'s disclosure example spelled out most literally before the C1 rewrite, so this result
+cannot be read as evidence the skill teaches the rule generically.
 
-**`failure-path` on `res.ok` is 0/3 → 3/3.** The rule that survived the C port most directly is
-the one the skill teaches most reliably.
+**`failure-path` on `res.ok` is 0/3 → 3/3.** `res.ok` was the other item the disclosure example
+spelled out most literally. See the confound below; this result is subject to the same caveat.
 
 Three problems, in descending order of importance:
 
@@ -378,10 +436,14 @@ was asked to quote that file before starting, and did, verbatim.
 as its reason: *"Power of 10 (repo declares `nasa-coding-standards: all-code`)"*. The block
 carried two applied-rule bullets and one `Seen, not touched:` bullet, all anchored.
 
-Worth noting against the over-fire arm, which was clean on the identical task without the marker:
-the marker is the only difference, and it flipped the behaviour. That is the opt-in working as
-designed, and it is also the sharpest evidence in this file that the skill's firing is under the
-description's control rather than incidental.
+Against the over-fire arm, which was clean on the identical task without the marker: this arm
+passed on its pre-registered criterion — a disclosure block appeared on a change the five
+categorical tests exclude, and the rep cited the marker as its reason. It is not a clean
+comparison against the over-fire arm, though: this rep was also asked to quote its `CLAUDE.md`
+before starting, which the over-fire reps were not, so that extra instruction is a confound in
+this arm's result. It is also not evidence that the skill's firing is under the description's
+control — a dispatched subagent never sees the description at all, only the skill's name, so this
+arm cannot speak to that question either way.
 
 One incidental finding: this rep changed behaviour to do the task — it added a `getCharge` call
 inside `handleRefundFailed` to get an amount worth formatting, and flagged the new outbound HTTP
@@ -445,8 +507,10 @@ obligation to bound the memory, even though the two are separate rows in the tab
 ### The stable core
 
 Across both GREEN runs, three results never moved: `res.ok` 6/6, `bounded-recursion` 6/6, and the
-over-fire check clean. Those are what the skill reliably buys, and they are worth having — 0/6 and
-0/3 respectively at baseline.
+over-fire check clean — 0/6 and 0/3 respectively at baseline. The over-fire result is clean
+evidence the skill stays quiet where it should. The other two are not clean evidence of what the
+skill teaches: both are the items the disclosure example named most literally before the C1
+rewrite. See "A confound in the GREEN arms" below.
 
 ## History
 
@@ -462,6 +526,35 @@ over-fire check clean. Those are what the skill reliably buys, and they are wort
 | Three wording fixes after GREEN-1 (`resolvable-dispatch`, scope, disclosure) | — |
 | Under-fire GREEN-2, 3 reps, revised skill | **10/21** — same total, failures redistributed |
 
+## A confound in the GREEN arms
+
+Before this fix wave, `SKILL.md`'s disclosure example used the fixture's own files and symbols
+verbatim: `src/refunds.ts:handleRefundCreated`, `src/reconcile.ts:reconcileCharge`,
+`src/config.ts`, and "metadata.ts recurses without a depth cap." Every GREEN and GREEN-2 rep read
+that example before editing, because it sits in the skill body they loaded.
+
+The two items the example named most literally are `res.ok` (`failure-path`) and the recursion
+depth cap (`bounded-recursion`). Both went 0/3 → 6/6 across the two GREEN runs. Item 8
+(`resolvable-dispatch`), the only scored defect absent from the example, stayed 0/6 across both
+runs. That pattern — most-literal-in-the-example improves most, absent-from-the-example never
+improves — means the causal claims this file made about those two items, including
+"`bounded-recursion` is the clean win… the skill fully answers it" and "the rule the skill
+teaches most reliably," are **confounded and cannot be read as evidence about a generic rule.**
+They may equally be evidence that an agent that reads an example naming its own fixture's files
+edits those files.
+
+Two things keep this from being a total wash. First, `bounded-memory` is also named in the old
+example (`src/reconcile.ts`, by association with the same disclosure bullet) and went 1/3 → 0/3
+across the two runs — the example's presence did not make every named item improve, so it is not
+the whole story. Second, the example was authored in the implementation plan before the fixture
+existed, so this is coupling between two artifacts written from the same design, not something
+tuned after seeing GREEN results.
+
+The example has been rewritten (see the C1 fix in the review that produced this section) to use
+symbols that appear nowhere in the fixture. Every GREEN and GREEN-2 number in this file predates
+that rewrite and should be read with this confound attached. The next arm to run must run against
+the rewritten example, not the one these numbers were produced under.
+
 ## Open questions
 
 **`resolvable-dispatch` is the unsolved one, and it got worse.** Re-aiming the applicability row
@@ -470,6 +563,11 @@ the edit, and both mentions were false. The next attempt should give the rule an
 can actually take — "if you add a key to a lookup typed `Record<string, …>`, change it to a
 `satisfies`-checked map and add a rejecting default" — rather than a property to assert. Until
 then the honest position is that this rule does not work.
+
+This fix wave changed the `resolvable-dispatch` row's Compliant minimum cell in `SKILL.md` to
+exactly that action-shaped wording. **UNTESTED.** The re-run budget for this skill is spent, and
+no arm has run against the new wording — the change is recorded here as a change made, not as a
+result.
 
 **A disclosure bullet cannot be trusted without reading the code.** Three of twelve blocks across
 both GREEN runs contained a factually false compliance claim carrying a correct `file:symbol`

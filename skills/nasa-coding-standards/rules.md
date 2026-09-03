@@ -203,6 +203,16 @@ function isHandledType(t: string): t is HandledType {
 which are idiomatic JS and would have made the rule ignorable. The call-graph invariant survives
 and covers a real vulnerability class.
 
+One caveat on the port itself. The stated C invariant is a statically resolvable call graph, and
+a bare `HANDLERS: Record<string, fn>` object literal already has a statically enumerable set of
+callees — the graph was never actually unresolvable here. What the allowlist requirement buys is
+that an attacker-controlled key cannot select a callee outside the set the source already
+enumerates, which is input validation, not call-graph resolution. The port keeps rule 9's
+*spirit* — an attacker should not steer which function runs — but the mechanism it prescribes is
+not the invariant this file's own adjudication test asks for, which makes this the one rule in
+this file whose port is contestable under that criterion. `TESTING.md` scores this rule 0/6
+across both GREEN runs.
+
 ## Rule 10 → `no-suppressed-diagnostics`
 
 **Original.** All code must be compiled, from the first day of development, with all compiler
@@ -210,7 +220,7 @@ warnings enabled at the compiler's most pedantic setting. All code must compile 
 warnings.
 
 **Port.** `strict: true`, `noUncheckedIndexedAccess: true`, `tsc --noEmit` clean, and zero
-`@ts-ignore`, `@ts-expect-error`, or `eslint-disable` without a written reason on the line.
+`@ts-ignore`, `@ts-expect-error`, `eslint-disable`, or `any` without a written reason on the line.
 
 ```ts
 // @ts-expect-error provider types lag the v3 payload; tracked in BILL-412
