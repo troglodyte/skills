@@ -379,6 +379,64 @@ The fixture's log line has no amount to format, which makes the over-fire task s
 invasive than intended. It did not affect either arm's verdict, but a cleaner over-fire fixture
 would put an amount already in scope.
 
+## Under-fire GREEN-2 — 2026-09-03, sonnet, 3 reps, revised skill (b7da7fc)
+
+Three wording fixes were made after GREEN-1: `resolvable-dispatch` re-aimed at the edit
+("you add to, or read from, a lookup…"), the scope rule extended to module-level values, and the
+disclosure section told to assert that *your change* made the rule hold. Same fixture, same
+prompt, one re-run. Not an iterate-until-green loop — this was the only re-run allowed, and the
+result stands as measured.
+
+| # | Item | Rule | R1 | R2 | R3 | GREEN-1 | RED-B |
+|---|---|---|---|---|---|---|---|
+| 1 | `res.ok` on the refund POST | `failure-path` | ✅ | ✅ | ✅ | 3/3 | 0/3 |
+| 2 | Floating `recordAudit` | `failure-path` | ✅ | ❌ | ❌ | 2/3 | 1/3 |
+| 4 | Paginating loop bounded | `bounded-loop` | ✅ | ✅ | ✅ | 1/3 | 0/3 |
+| 5 | Full accumulation | `bounded-memory` | ❌ | ❌ | ❌ | 1/3 | 0/3 |
+| 6 | Authored recursion bounded | `bounded-recursion` | ✅ | ✅ | ✅ | 3/3 | 0/3 |
+| 7 | `@ts-ignore` | `no-suppressed-diagnostics` | ⬜ | ⬜ | ⬜ | 0/3 | 0/3 |
+| 8 | Untrusted dispatch | `resolvable-dispatch` | ❌ | ❌ | ❌ | 0/3 | 0/3 |
+| — | **Total** | | **4/7** | **3/7** | **3/7** | **10/21** | **1/21** |
+
+**10 of 21 — identical to GREEN-1.** The revision did not change the total. It moved the failures
+around, and that is the finding.
+
+### What each fix actually did
+
+**Change 1 worked, and made things worse.** `bounded-loop` went 1/3 → **3/3**: all three reps
+now reach `reconcile.ts` and cap the pagination against `MAX_REFUND_PAGES` in `config.ts`. But
+`resolvable-dispatch` went from *unmentioned* to *falsely claimed*: 2 of 3 blocks now assert
+compliance —
+
+> `resolvable-dispatch` → `refund.partial` added to the existing allowlisted handler map, which
+> already rejects unknown types (`src/webhook.ts`)
+
+The map is still `Record<string, ...>` and the guard is still `if (!handler) return`. Re-aiming
+the applicability row made the rule *fire* without making the compliant minimum *reachable*, so
+agents resolved the gap by redescribing the existing code as already compliant. **A rule that
+fires but cannot be satisfied by the edit in front of you gets reported as satisfied.** That is
+the most important thing this whole test produced.
+
+**Change 3 did not work.** It was written specifically to stop the false claim — "a bullet
+asserts that **your change** made the rule hold" — and the false claim went from 1 rep to 2. An
+instruction not to make a claim does not prevent the claim; only a checkable criterion does.
+
+**Change 2 did not work, and was aimed wrongly.** `no-suppressed-diagnostics` stayed 0/3, all
+three via `Seen, not touched:`. The new wording says you own "every function you modify, and
+every module-level value it reads" — but the reps modified the module-level value (`handlers`)
+and did *not* modify the function that reads it (`handleWebhook`). The extension covers the
+opposite direction from the one that occurs.
+
+**`bounded-memory` regressed, 1/3 → 0/3.** All three capped the page count and then accumulated
+every page into an array before reducing it. Bounding the loop appears to discharge the felt
+obligation to bound the memory, even though the two are separate rows in the table.
+
+### The stable core
+
+Across both GREEN runs, three results never moved: `res.ok` 6/6, `bounded-recursion` 6/6, and the
+over-fire check clean. Those are what the skill reliably buys, and they are worth having — 0/6 and
+0/3 respectively at baseline.
+
 ## History
 
 | Change | Result |
@@ -390,7 +448,40 @@ would put an amount already in scope.
 | Under-fire GREEN, 3 reps, skill loaded (name-only trigger) | **10/21**; bar not met |
 | Over-fire check, 2 reps | clean 2/2 |
 | Opt-in arm, 1 rep, `all-code` marker in the fixture's CLAUDE.md | pass — marker read and cited |
+| Three wording fixes after GREEN-1 (`resolvable-dispatch`, scope, disclosure) | — |
+| Under-fire GREEN-2, 3 reps, revised skill | **10/21** — same total, failures redistributed |
 
 ## Open questions
 
-None recorded yet. Fill in after the arms run.
+**`resolvable-dispatch` is the unsolved one, and it got worse.** Re-aiming the applicability row
+made the rule fire (0 → 2 of 3 mentioning it) without making its compliant minimum reachable from
+the edit, and both mentions were false. The next attempt should give the rule an action the edit
+can actually take — "if you add a key to a lookup typed `Record<string, …>`, change it to a
+`satisfies`-checked map and add a rejecting default" — rather than a property to assert. Until
+then the honest position is that this rule does not work.
+
+**A disclosure bullet cannot be trusted without reading the code.** Three of twelve blocks across
+both GREEN runs contained a factually false compliance claim carrying a correct `file:symbol`
+anchor. The anchor makes the claim locatable, not true. Any review skill built on `rules.md`
+must verify bullets rather than count them.
+
+**`bounded-loop` and `bounded-memory` interact.** Capping the loop reads as discharging the
+obligation to bound the memory: GREEN-2 is 3/3 on the first and 0/3 on the second, in the same
+function. They may need to be one row rather than two.
+
+**The trigger has never been tested.** A dispatched subagent sees the skill's name, not its
+description. Every under-fire result here is a test of the body under a name-only trigger. The
+five categorical tests — which the design calls "the product" — are unmeasured, and testing them
+needs an interactive session, not a subagent.
+
+**The relaxation half of the contract is unexercised.** Across nine under-fire reps, no agent
+relaxed anything and the `po10-relaxed` marker has never been written. Criterion 4 of the
+disclosure scoring — that a relaxation cite an external, locatable guarantee — has no data at all.
+
+**Length is recorded, not gated.** `SKILL.md` is 966 words against the spec's ~700 and
+`design-patterns`' 746. The budget was raised once and then demoted rather than raised again.
+Nobody has measured whether length costs anything here.
+
+**The over-fire fixture is slightly invasive.** `handleRefundFailed` has no amount to format, so
+all three reps that ran the formatting task added a `getCharge` call to get one. The verdicts
+were unaffected, but a cleaner fixture would put an amount already in scope.
