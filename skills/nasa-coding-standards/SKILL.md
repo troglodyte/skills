@@ -27,7 +27,7 @@ for a reviewer to see.
 | `bounded-recursion` | A function recurses over a structure whose depth crossed a trust boundary | A depth counter that throws, or an explicit stack |
 | `failure-path` | A call returns a Promise, a `Response` or an exit code, or emits `'error'` | Awaited or `.catch`ed non-emptily; `res.ok` checked; exit code read; an `'error'` listener; no empty `catch` |
 | `assert-invariants` | A value's validity is not expressible in its type | Zod at the boundary, an explicit check that throws a typed error, or `never` in an exhaustive switch |
-| `resolvable-dispatch` | The callee is selected by a string from outside the process | An allowlist, or a `satisfies`-checked map with a rejecting default. Never `eval` |
+| `resolvable-dispatch` | You add to, or read from, a lookup whose key comes from outside the process — adding an entry to one counts | An allowlist, or a `satisfies`-checked map with a rejecting default. Never `eval` |
 | `no-suppressed-diagnostics` | The change adds or touches `@ts-ignore`, `@ts-expect-error`, `eslint-disable` or `any` | Remove it, or a written reason on the same line. `tsc --noEmit` clean |
 
 Two carry more weight than the rest in Node. **`fetch` does not throw on 4xx or 5xx** — it
@@ -38,9 +38,9 @@ C originals, the adjudication, and the two rules deferred to repo convention: `r
 
 ## Scope
 
-You own every function you modify. **Introducing the problem is not the test — touching the
-function is.** Extracting a bad call into a new helper, or rewriting a function around its
-existing shape, makes it yours.
+You own every function you modify, and every module-level value it reads. **Introducing the
+problem is not the test — touching the code is.** Extracting a bad call into a new helper, or
+rewriting a function around its existing shape, makes it yours.
 
 Violations in code you did not modify are not fixed and not enumerated — report them in
 **one** `Seen, not touched:` bullet for the whole change.
@@ -81,7 +81,9 @@ Power of 10:
 ```
 
 The `file:symbol` anchor is required — an unanchored claim is the cheapest thing to write and
-the hardest to falsify.
+the hardest to falsify. A bullet asserts that **your change** made the rule hold. Adding an
+entry to a structure that was already unsafe is not compliance; describing it as though the
+structure were already safe is worse.
 
 **If no rule produced a change, emit no block.** Silence is correct on a change these rules do
 not touch.
