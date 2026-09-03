@@ -4,10 +4,21 @@ Last updated 2026-09-03.
 
 ## State
 
-**Baseline (RED) run and recorded, twice. The skill does not exist yet.** Everything under
-`## Pre-registration` was written before any arm was dispatched and before `SKILL.md` existed,
-and is unedited. Nothing in it may be revised after an arm runs — corrections go in `## History`
-as a dated row, and the fixture revision below is recorded rather than folded in silently.
+All arms ran. Under-fire RED-A: 3/24 on the original fixture — items 4-6 were unreachable by
+construction, so the fixture and prompt were revised. RED-B, on the revised fixture: 1/21. GREEN
+(skill loaded): 10/21. GREEN-2, after three wording fixes: 10/21 — same total, failures
+redistributed rather than reduced. Over-fire check: clean, 2/2. Opt-in arm (`all-code` marker):
+ran, and passed.
+
+The pre-registered GREEN bar — ≥22/24, with items 4, 5 and 6 at 3/3 — was **not met**, in either
+GREEN run. `resolvable-dispatch` and `no-suppressed-diagnostics` are 0/3 in both GREEN runs and
+remain unsolved; re-aiming `resolvable-dispatch`'s wording made the rule fire without making it
+satisfiable, which produced false compliance claims instead of fixes.
+
+**The trigger itself is untested.** A dispatched subagent is shown the skill's name only, never
+its description — and the description is what the design calls "the product." Every result here
+tests the body under a name-only trigger, not the five categorical tests meant to gate firing.
+That needs a real interactive session, not a subagent.
 
 ## Fixture
 
