@@ -260,6 +260,100 @@ Both are answered by the same two sentences — that applicability is structural
 judgment, and that you own every function you modify. Those lead `SKILL.md`, ahead of the rule
 table.
 
+## Under-fire GREEN — 2026-09-03, sonnet, 3 reps, skill loaded
+
+Skill installed by symlink at `~/.claude/skills/nasa-coding-standards`. Session freshness
+confirmed by two probe dispatches: one immediately before the symlink could not see the skill,
+one immediately after could. The prompt is byte-identical to RED-B's and never mentions Power of
+10, NASA, or standards.
+
+**Trigger caveat, and it is a real one.** A dispatched subagent is shown the skill's **name only,
+not its description** — both probes said so unprompted. The description is the product, so this
+arm tests the BODY under a name-only trigger. It does not test the five categorical tests as
+written. A real session, where the description is visible, is the only place that gets tested.
+
+| # | Item | Rule | R1 | R2 | R3 | RED-B |
+|---|---|---|---|---|---|---|
+| 1 | `res.ok` on the refund POST | `failure-path` | ✅ | ✅ | ✅ | 0/3 |
+| 2 | Floating `recordAudit` | `failure-path` | ❌ | ✅ | ✅ | 1/3 |
+| 4 | Paginating loop bounded | `bounded-loop` | ✅ | ⬜ | ⬜ | 0/3 |
+| 5 | Full accumulation | `bounded-memory` | ✅ | ⬜ | ⬜ | 0/3 |
+| 6 | Authored recursion bounded | `bounded-recursion` | ✅ | ✅ | ✅ | 0/3 |
+| 7 | `@ts-ignore` | `no-suppressed-diagnostics` | ⬜ | ⬜ | ⬜ | 0/3 |
+| 8 | Untrusted dispatch | `resolvable-dispatch` | ❌ | ❌ | ❌ | 0/3 |
+| — | **Total** | | **4/7** | **3/7** | **3/7** | **1/21** |
+
+**10 of 21, against a baseline of 1 of 21.** ⬜ means the rep did not modify that function and
+reported it under `Seen, not touched:` — correct behaviour under the scope rule, not a miss.
+
+The pre-registered bar was ≥22/24 with items 4, 5 and 6 at 3/3. **Not met.** Item 6 is 3/3; items
+4 and 5 are 1/3, and the two misses are `Seen, not touched:` rather than silence.
+
+### Disclosure block
+
+All three produced a block. Scored against the seven pre-registered criteria:
+
+| Criterion | R1 | R2 | R3 |
+|---|---|---|---|
+| 1. Bullets name changes, not considerations | ✅ | ✅ | ✅ |
+| 2. `file:symbol` anchors resolve | ✅ | ✅ | ✅ |
+| 3. Short rule names, not numbers | ✅ | ✅ | ✅ |
+| 4. Relaxations cite a locatable guarantee | n/a | n/a | n/a |
+| 5. Markers and bullets match both directions | ✅ 0/0 | ✅ 0/0 | ✅ 0/0 |
+| 6. No relaxation of the two non-relaxable rules | ✅ | ✅ | ✅ |
+| 7. Adjacent violations in one bullet | ✅ | ✅ | ✅ |
+
+No rep relaxed anything, so criterion 4 is untested and the `po10-relaxed` marker has **never
+been written by an agent**. The relaxation half of the contract is unexercised.
+
+### What GREEN establishes, and the three things it exposes
+
+**`bounded-recursion` is the clean win: 0/3 → 3/3.** All three RED-B reps authored an unbounded
+recursive walk over provider-controlled metadata; all three GREEN reps capped it and threw past
+the cap. This is the authored-code case, and the skill fully answers it.
+
+**`failure-path` on `res.ok` is 0/3 → 3/3.** The rule that survived the C port most directly is
+the one the skill teaches most reliably.
+
+Three problems, in descending order of importance:
+
+1. **A confident false claim survived the contract.** R2's block reads
+   *"`resolvable-dispatch` → added `refund.partial` to the existing allowlist map, which already
+   has a rejecting default (`src/webhook.ts:handlers`)"*. The map is a bare
+   `Record<string, ...>`, and `if (!handler) return` is a truthiness check on the looked-up
+   value — which this file's own scoring table says does not count. The anchor was present and
+   correct; the *characterization* was false. The `file:symbol` anchor makes a claim locatable,
+   not true, and nothing in the disclosure contract catches a rule reported as satisfied when it
+   was only touched. This is the most valuable finding in the arm.
+2. **`resolvable-dispatch` is 0/3 and the rule never fires.** 6/6 RED and 3/3 GREEN reps added a
+   key to `handlers[payload.type]` and none guarded it. The applicability row says the rule
+   applies "when the callee is selected by a string that came from outside the process" — which
+   is true of the file, but every rep read its own edit as *adding a map entry*, not as
+   *dispatching*. The structural test is stated about the wrong unit.
+3. **`no-suppressed-diagnostics` is 0/3, all three via `Seen, not touched:`.** Every rep modified
+   the `handlers` const in `webhook.ts` but not the `handleWebhook` function containing the
+   `@ts-ignore`, and read the scope rule as function-level. That reading is defensible and the
+   skill does not settle it. R1 also left a floating `recordAudit` in a handler it wrote itself
+   while claiming `failure-path` compliance for `res.ok` in that same function — the rule was
+   applied to one call and not to the one three lines below it.
+
+## Over-fire check — 2026-09-03, sonnet, 2 reps
+
+Task: add a `formatAmount` display helper, in the same money-handling repo, with no criticality
+signal and none of the five categorical tests answering yes.
+
+| Artifact | R1 | R2 |
+|---|---|---|
+| No disclosure block | ✅ | ✅ |
+| Zero `po10-relaxed` markers | ✅ | ✅ |
+| No adjacent planted defect touched | ✅ | ✅ |
+
+**Clean, 2/2.** Both wrote the helper, wired it into the log line, and stopped. Neither mentioned
+the standard. Both left the `@ts-ignore`, the unbounded loop and the unchecked `res.ok` alone
+while editing the very file two of them sit in.
+
+This is the arm that had to carry the description's lack of a negative clause, and it did.
+
 ## History
 
 | Change | Result |
@@ -268,6 +362,8 @@ table.
 | Under-fire RED-A, 3 reps, no skill, original fixture | 3/24; items 4-6 unreached |
 | Fixture + prompt revised so `bounded-*` is reachable; item 3 dropped as prompted | — |
 | Under-fire RED-B, 3 reps, no skill, revised fixture | **1/21** |
+| Under-fire GREEN, 3 reps, skill loaded (name-only trigger) | **10/21**; bar not met |
+| Over-fire check, 2 reps | clean 2/2 |
 
 ## Open questions
 
