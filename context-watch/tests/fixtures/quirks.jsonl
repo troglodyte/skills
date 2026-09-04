@@ -1,5 +1,0 @@
-{"type":"assistant","message":{"content":"a bare string, not a list","usage":{"cache_read_input_tokens":100}}}
-not valid json at all
-{"type":"assistant","message":{"usage":{"cache_read_input_tokens":200},"content":[{"type":"tool_use","id":"t9","name":"Read","input":{"__unparsedToolInput":"truncated"}}]}}
-{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t9","content":[{"type":"text","text":"block list form"}]}]}}
-{"type":"assistant","isSidechain":true,"message":{"usage":{"cache_read_input_tokens":300},"content":[{"type":"text","text":"subagent"}]}}

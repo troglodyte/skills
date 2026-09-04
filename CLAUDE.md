@@ -4,43 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A collection of authored Claude Code **agent skills**. For the `skills` plugin there is no source
-code, no build, no test runner, no dependencies — every artifact is markdown that gets loaded into
-an agent's context. The "product" is agent behaviour, so the only meaningful verification is
-behavioural (see Testing).
-
-The one exception is `context-watch/`, a second plugin vendored from
-[troglodyte/context-watch-plugin](https://github.com/troglodyte/context-watch-plugin). It ships
-python (a `UserPromptSubmit` guard hook and two tools) with a real unittest suite:
-
-```
-cd context-watch && python3 -m unittest discover -s tests
-```
-
-Upstream is the source of truth for it. Fix things there and re-vendor; a fix made only here will
-be overwritten the next time this copy is refreshed.
+A collection of authored Claude Code **agent skills**. There is no source code, no build, no test
+runner, no dependencies — every artifact is markdown that gets loaded into an agent's context. The
+"product" is agent behaviour, so the only meaningful verification is behavioural (see Testing).
 
 ## Layout
 
-The repo is both a plugin and its own marketplace, and the marketplace lists two plugins:
+The repo is both a plugin and its own single-plugin marketplace:
 
 ```
 .claude-plugin/
-  marketplace.json   # marketplace "trog-skills": plugin "skills" (source ".")
-                     # plus plugin "context-watch" (source "./context-watch")
-  plugin.json        # the "skills" plugin manifest — bump version here on release
+  marketplace.json   # marketplace "trog-skills", one plugin, source "."
+  plugin.json        # the plugin manifest — bump version here on release
 skills/
   <skill-name>/
     SKILL.md         # required — frontmatter + the skill body
     *.md             # optional reference files, loaded only on demand
     TESTING.md       # optional — behavioural test record for that skill
-context-watch/       # the second plugin, vendored — its own .claude-plugin/plugin.json,
-                     # skills/check/, hooks/, tools/, tests/
 ```
-
-`context-watch` is a separate plugin rather than another directory under `skills/` because
-installing it registers a hook that runs on every turn. Folding it into `skills` would force that
-on anyone who wanted only the markdown skills.
 
 Skills **must** live under `skills/` — that is where Claude Code looks inside a plugin. Adding a
 skill is just a new directory there; neither manifest needs editing (the plugin ships all of them,
@@ -62,13 +43,11 @@ The intended path is the plugin marketplace:
 ```
 /plugin marketplace add troglodyte/skills     # or a local path while developing
 /plugin install skills@trog-skills
-/plugin install context-watch@trog-skills     # optional, adds the per-turn guard hook
 ```
 
 One plugin ships every *skill*. That was a deliberate call over plugin-per-skill: nothing under
 `skills/` is worth installing in isolation yet, and the split would cost a nested `plugin.json`
-plus a marketplace entry per skill. `context-watch` is the exception, and the reason is the hook,
-not the skill — see Layout. Revisit the rest if someone actually wants one skill without the others.
+plus a marketplace entry per skill. Revisit if someone actually wants one skill without the others.
 
 Symlinking a single skill into `~/.claude/skills/<name>` still works and is the faster loop while
 iterating on one skill. Current state worth knowing (verified 2026-09-03):
@@ -102,18 +81,13 @@ iterating on one skill. Current state worth knowing (verified 2026-09-03):
   particular the confound section and the two rules that score 0/6.
 - `improve-codebase-architecture/` at the repo root is an empty untracked stub, outside `skills/` and
   therefore not shipped; the installed skill of that name comes from `~/.agents/skills/`.
-- `context-watch` is installed from its own marketplace
-  (`context-watch@context-watch`, cached under `~/.claude/plugins/cache/context-watch/`), **not**
-  from this repo's copy. Editing `context-watch/` here changes nothing in a running session until
-  that install is repointed at `trog-skills`.
 
 `design-patterns` is additionally reinforced by a "Design dialog" section in `~/.claude/CLAUDE.md`.
 That section was deliberately kept after testing — see `design-patterns/TESTING.md` before removing it.
 
 ## Testing a skill
 
-There is nothing to run for the skills under `skills/` (`context-watch`'s python is the exception,
-and its unittest suite is above). A skill is tested by dispatching general-purpose subagents at a fixture and
+There is nothing to run. A skill is tested by dispatching general-purpose subagents at a fixture and
 scoring **the shape of the reply**, never by asking the agent whether it used the skill (that
 contaminates the result). `design-patterns/TESTING.md` is the worked example and the template:
 fixture, prompt, explicit pass criteria, history table, open questions.
