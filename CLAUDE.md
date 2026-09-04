@@ -93,11 +93,13 @@ iterating on one skill. Current state worth knowing (verified 2026-09-03):
   (`.claude/worktrees/npm-aws-codeartifact-migration-ba3733/skills/pr-review`, branch
   `claude/code-review-skill-6ad4fd`). That skill is not on `main` and the symlink breaks if the
   worktree is removed. Land the branch, then repoint at the main checkout.
-- `~/.claude/skills/nasa-coding-standards` is the same trap: a symlink into **this** worktree
-  (`.claude/worktrees/nasa-coding-standards-0ba3cb/skills/nasa-coding-standards`, branch
-  `claude/nasa-coding-standards-0ba3cb`). It also is not in the 0.3.0 plugin cache, so the symlink
-  is the only path that reaches the agent — the plugin ships nothing for it yet. The link breaks
-  when the worktree is removed; repoint it at the main checkout once the branch lands.
+- `~/.claude/skills/nasa-coding-standards` is a symlink to the **main checkout**
+  (`/Users/michael.harris/code/skills/skills/nasa-coding-standards`), repointed there when the
+  branch landed in `edbfa75`, so it tracks `main` and survives worktree cleanup. It is not in the
+  0.3.0 plugin cache, so that symlink is the only path reaching the agent until a release is cut —
+  the plugin ships nothing for it yet. Its behavioural record is unusually complete and unusually
+  unflattering: read `nasa-coding-standards/TESTING.md` before trusting any claim about it, in
+  particular the confound section and the two rules that score 0/6.
 - `improve-codebase-architecture/` at the repo root is an empty untracked stub, outside `skills/` and
   therefore not shipped; the installed skill of that name comes from `~/.agents/skills/`.
 - `context-watch` is installed from its own marketplace
