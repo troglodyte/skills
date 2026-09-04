@@ -71,16 +71,33 @@ plus a marketplace entry per skill. `context-watch` is the exception, and the re
 not the skill — see Layout. Revisit the rest if someone actually wants one skill without the others.
 
 Symlinking a single skill into `~/.claude/skills/<name>` still works and is the faster loop while
-iterating on one skill. Current state worth knowing:
+iterating on one skill. Current state worth knowing (verified 2026-09-03):
 
-- `design-patterns` is installed by symlink, but it points at
-  `/home/trog/code/utils-folder/skills/design-patterns` (byte-identical copy, different repo). This
-  repo is the newer home; editing here does **not** change the installed skill until that symlink is
-  repointed or the plugin is installed.
-- `run-script-handoff` is not installed anywhere yet.
-- `deploy` is installed by symlink from `~/.claude/skills/deploy`, pointing into this repo,
-  so edits here are live in the next session. Its baseline test is recorded; the GREEN arm
-  has never been run — see `deploy/TESTING.md` before trusting it.
+- **The plugin is installed from GitHub, not from this checkout.** `skills@trog-skills` resolves to
+  `~/.claude/plugins/cache/trog-skills/skills/0.3.0`, cloned from `troglodyte/skills`. Every
+  `skills:<name>` entry in the skill list is that frozen 0.3.0 snapshot — editing this repo does
+  **not** change it until a release is tagged, pushed, and the plugin updated. As of 0.3.0 the cache
+  and `main` are byte-identical, so the distinction is currently invisible; it stops being invisible
+  the moment anything lands on `main`.
+- `design-patterns` is *also* installed by symlink at `~/.claude/skills/design-patterns`, now
+  pointing at `/Users/michael.harris/code/skills/skills/design-patterns` — the **main checkout**, so
+  it tracks `main` and survives worktree cleanup. It was repointed from a byte-identical copy in
+  `code/utils-folder`. This means design-patterns appears twice in the skill list: the live symlink
+  and the plugin's 0.3.0 copy. That redundancy is the price of the fast edit loop; delete the symlink
+  if the duplicate ever causes trouble.
+- `deploy`, `markdown`, `explain-it-to-me` and `run-script-handoff` have **no symlink** — they reach
+  the agent only through the plugin cache. Edits here are not live for them.
+- `deploy`'s baseline test is recorded but the GREEN arm has never been run — see
+  `deploy/TESTING.md` before trusting it.
+- `~/.claude/skills/pr-review` is a symlink into a **git worktree**
+  (`.claude/worktrees/npm-aws-codeartifact-migration-ba3733/skills/pr-review`, branch
+  `claude/code-review-skill-6ad4fd`). That skill is not on `main` and the symlink breaks if the
+  worktree is removed. Land the branch, then repoint at the main checkout.
+- `~/.claude/skills/nasa-coding-standards` is the same trap: a symlink into **this** worktree
+  (`.claude/worktrees/nasa-coding-standards-0ba3cb/skills/nasa-coding-standards`, branch
+  `claude/nasa-coding-standards-0ba3cb`). It also is not in the 0.3.0 plugin cache, so the symlink
+  is the only path that reaches the agent — the plugin ships nothing for it yet. The link breaks
+  when the worktree is removed; repoint it at the main checkout once the branch lands.
 - `improve-codebase-architecture/` at the repo root is an empty untracked stub, outside `skills/` and
   therefore not shipped; the installed skill of that name comes from `~/.agents/skills/`.
 - `context-watch` is installed from its own marketplace
